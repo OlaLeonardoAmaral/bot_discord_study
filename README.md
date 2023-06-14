@@ -2,18 +2,20 @@
 
 # Metas
 
-:x:  mensagem de bem-vindo 
+:x:  Mensagem de bem-vindo 
+
+:x:  Apresentar uma imagem personalizada na mensagem de bem vindo 
 
 :x:  Mensagem de saída 
 
-:x:  cargo automático (assim que entra VISITANTE)
+:x:  Cargo automático (assim que entra VISITANTE)
 
-:x:  cargo por reação 
+:x:  Cargo por reação 
 
-:x:  música 
+:x:  Música 
 
-:x:  registro 
+:x:  Registro 
 
-:x:  jogo gratis 
+:x:  Jogo gratis 
 
-:x:  divulgação de stream
+:x:  Divulgação de stream
