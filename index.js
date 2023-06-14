@@ -5,8 +5,15 @@ const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 require('dotenv').config();
 
+const { TOKEN } = process.env;
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({
+	intents: [
+		GatewayIntentBits.Guilds,
+		GatewayIntentBits.GuildMessages,
+		GatewayIntentBits.GuildMembers,
+	],
+});
 
 client.commands = new Collection()
 
@@ -19,7 +26,7 @@ for (const folder of commandFolders) {
 	for (const file of commandFiles) {
 		const filePath = path.join(commandsPath, file);
 		const command = require(filePath);
-        
+
 		if ('data' in command && 'execute' in command) {
 			client.commands.set(command.data.name, command);
 		} else {
@@ -28,9 +35,34 @@ for (const folder of commandFolders) {
 	}
 }
 
+client.on(Events.GuildMemberAdd, async member => {
+
+	const channel = member.guild.channels.cache.find(channel => channel.name === "general")
+    if (!channel) return;
+
+	member.roles.add('1118356079051550730')
+
+	channel.send(`Bem Vindo <@${member.user.id}>`)
+
+	// console.log(member)
+})
+
 client.on(Events.InteractionCreate, async interaction => {
+
+	if (interaction.isStringSelectMenu()) {
+		const select = interaction.values[0]
+
+		if (select == "javascript") {
+			await interaction.reply("Documentation the JavaScript: https://developer.mozilla.org/pt-BR/docs/Web/JavaScript")
+		} else if (select == "discordjs") {
+			await interaction.reply("Documentation the DiscordJs: https://discordjs.guide/#before-you-begin")
+		} else {
+			return
+		}
+	}
+
 	if (!interaction.isChatInputCommand()) return;
-	// console.log(interaction.user.username);
+	 console.log(interaction);
 	const command = interaction.client.commands.get(interaction.commandName);
 
 	if (!command) {
@@ -55,4 +87,4 @@ client.once(Events.ClientReady, c => {
 	console.log(`Ready! Logged in as ${c.user.tag}`);
 });
 
-client.login(process.env.TOKEN);
+client.login(TOKEN);
