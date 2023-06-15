@@ -2,8 +2,9 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
+const { AttachmentBuilder, Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 require('dotenv').config();
+const Canvas = require('@napi-rs/canvas');
 
 const { TOKEN } = process.env;
 
@@ -35,15 +36,48 @@ for (const folder of commandFolders) {
 	}
 }
 
+
+const applyText = (canvas, text) => {
+	const context = canvas.getContext('2d');
+	let fontSize = 70;
+
+	do {
+		context.font = `${fontSize -= 10}px sans-serif`;
+	} while (context.measureText(text).width > canvas.width - 300);
+
+	return context.font;
+};
+
 client.on(Events.GuildMemberAdd, async member => {
 
 	const channel = member.guild.channels.cache.find(channel => channel.name === "general")
-    if (!channel) return;
+	if (!channel) return;
 
-	member.roles.add('1118356079051550730')
 
-	channel.send(`Bem Vindo <@${member.user.id}>`)
+	const canvas = Canvas.createCanvas(700, 250);
+	const context = canvas.getContext('2d');
 
+	const background = await Canvas.loadImage('./assets/imagem_teste.png');
+	context.drawImage(background, 0, 0, canvas.width, canvas.height);
+
+	// Slightly smaller text placed above the member's display name
+	context.font = '28px sans-serif';
+	context.fillStyle = '#ffffff';
+	context.fillText('Bem vindo caralho', canvas.width / 2.5, canvas.height / 3.5);
+
+	context.font = applyText(canvas, member.user.username);
+	context.fillStyle = '#ffffff';
+	context.fillText(member.user.username, canvas.width / 2.5, canvas.height / 1.8);
+
+	const avatar = await Canvas.loadImage(member.user.displayAvatarURL({ extension: 'jpg' }));
+	context.drawImage(avatar, 25, 25, 200, 200);
+
+	const attachment = new AttachmentBuilder(await canvas.encode('png'), { name: 'profile-image.png' });
+
+	member.roles.add('1118356079051550730') // adicionando o cargo
+	channel.send({ files: [attachment] })
+
+	// channel.send(`Bem Vindo <@${member.user.id}>`)
 	// console.log(member)
 })
 
@@ -62,7 +96,7 @@ client.on(Events.InteractionCreate, async interaction => {
 	}
 
 	if (!interaction.isChatInputCommand()) return;
-	 console.log(interaction);
+	// onsole.log(interaction);
 	const command = interaction.client.commands.get(interaction.commandName);
 
 	if (!command) {
